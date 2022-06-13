@@ -1,7 +1,8 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { <%= modelClass %> } from './<%= modelDir %><%= modelFileName %>';
+import {CustomRepository} from "../util/typeorm/typeorm-ex.decorator";
 
-@EntityRepository(<%= modelClass %>)
+@CustomRepository(<%= modelClass %>)
 export class <%= nameUpper %>Repository extends Repository<<%= modelClass %>> {
 
 }

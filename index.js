@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const generate = require('./lib/generator');
 const TypeHelper = require('./lib/TypeHelper');
+var pluralize = require('pluralize')
 
 let version = pjson ? pjson.version : '<unknown version>';
 
@@ -110,6 +111,7 @@ prog
 
     o.name = args.name.toLowerCase();
     o.nameUpper = _capitalize(args.name);
+    o.namePluralize = pluralize(o.name)
 
     // set auth guarding params if applicable?
     if (o.auth) {
@@ -139,7 +141,7 @@ prog
     // make containing folder for the module, if using, or otherwise the package name
     let outPath =  path.resolve((o.prefix ? o.prefix : './'));
     if (o.module) {
-        outPath += `/modules/${o.name}`;
+        outPath += `/${o.name}`;
     } else {
         outPath += o.noSubdir ? '' : `/${o.name}`;
     }
@@ -171,7 +173,7 @@ prog
 
         fs.mkdirSync(outPathModel, { recursive: true });
 
-        o.modelFileName = _getFileName(o.modelClass, 'model', o.casing);
+        o.modelFileName = _getFileName(o.modelClass, 'entity', o.casing);
         let outFile = `${outPathModel}/${o.modelFileName}.ts`;
         stagedFiles.push({ type: 'model', outFile });
     }

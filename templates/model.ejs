@@ -1,5 +1,5 @@
 <% if (modelBaseClass) { %>import { <%= modelBaseClass %> } from '<%= modelBaseDir %><%= modelBaseClass %>';<% } -%>
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn} from 'typeorm';
 
 @Entity('<%= modelClassLower %>')
 export class <%= modelClass %> <% if (modelBaseClass) { %>extends <%= modelBaseClass %> <% } %>{
@@ -21,4 +21,10 @@ export class <%= modelClass %> <% if (modelBaseClass) { %>extends <%= modelBaseC
     <%= prop %>: <%= modelProps[prop] %>;
 <% } -%>
 <% }) %>
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
 }

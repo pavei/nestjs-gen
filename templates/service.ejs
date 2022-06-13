@@ -1,36 +1,61 @@
-import { Injectable, UnauthorizedException, Request } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException} from '@nestjs/common';
 <% if (repository) { %>import { <%= nameUpper %>Repository } from './<%= repositoryFileName %>';<% } %>
 <% if (model || repository || crud) { %>import { <%= modelClass %> } from './<%= modelDir %><%= modelFileName %>';<% } %>
 
 @Injectable()
 export class <%= nameUpper %>Service {
 
-    public constructor(<% if (repository || crud) { %>@InjectRepository(<%= repositoryName %>) private <%= name  %>Repository: <%= repositoryName %><% } %>) {
+    logger: Logger;
+
+    public constructor(<% if (repository || crud) { %> private <%= name  %>Repository: <%= repositoryName %><% } %>) {
+        this.logger = new Logger('<%= nameUpper %>Service');
     }
 
 <% if (crud) { -%>
-    public async getById(id: number): Promise<<%= modelClass %>> {
-        return await this.<%= name %>Repository.findOne({ id });
+    public async findById(id: number): Promise<<%= modelClass %>> {
+        this.logger.debug(`findById`, id);
+        let found = await this.<%= name %>Repository.findOneBy({ id });
+
+        if (!found) {
+            throw new NotFoundException('NOT_FOUND_EXCEPTION');
+        }
+        return found;
     }
 
-    public create(@Request() req, <%= modelClassLower %>: <%= modelClass %>): Promise<<%= modelClass %>> {
-        <% if (repository || crud) { %><%= modelClassLower %> = this.<%= name %>Repository.create(<%= modelClassLower %>);
-        return this.<%= name %>Repository.save(<%= modelClassLower %>);<% } %>
+    public async create(<%= modelClassLower %>: <%= modelClass %>): Promise<void> {
+        try {
+            this.logger.debug(`create()`);
+            await this.<%= name %>Repository.save(<%= modelClassLower %>);
+          } catch (e) {
+             this.logger.error(e);
+            throw new InternalServerErrorException('INTERNAL_SERVER_ERROR');
+        }
     }
 
-    public async update(@Request() req, <%= modelClassLower %>: <%= modelClass %>): Promise<<%= modelClass %>> {
-        <% if (repository || crud) { %>return this.<%= name %>Repository.save(<%= modelClassLower %>);<% } %>
+    async update(<%= modelClassLower %>: <%= modelClass %>): Promise<void> {
+        try {
+            this.logger.debug(`update ${<%= modelClassLower %>.id}`);
+            <%= modelClassLower %>.updatedAt = new Date();
+            await this.<%= name %>Repository.save(<%= modelClassLower %>);
+        } catch (e) {
+             this.logger.error(e);
+             throw new InternalServerErrorException('INTERNAL_SERVER_ERROR');
+        }
     }
 
-    public async remove(@Request() req, id: number) {
-        let <%= modelClassLower %> = await this.<%= name %>Repository.findOne({ id });
-        await this.<%= name %>Repository.delete(id);
-        return <%= modelClassLower %>;
+    async delete(id : number): Promise<void> {
+        this.logger.debug(`delete ${id}`);
+        const result = await this.<%= name %>Repository.delete(id);
+
+        if (result.affected === 0) {
+            throw new NotFoundException(`NOT_FOUND_EXCEPTION`);
+        }
     }
 
-    public async search(@Request() req): Promise<Array<<%= modelClass %>>> {
-        <% if (repository || crud) { %>return await this.<%= name %>Repository.find({<% if (auth) { %>where: { user: req.principal }<% } %>});<% } %>
+    async findAll(): Promise< <%= modelClass %>[]> {
+        this.logger.debug(`findAll()`);
+         return await this.<%= name %>Repository.find();
     }
+
 <% } %>
 }
