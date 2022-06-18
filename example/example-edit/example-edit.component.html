@@ -1,0 +1,61 @@
+<div class="content-heading">
+  <div *ngIf="item">{{(item.id ? 'EDIT' : 'NEW') | translate }} {{'PRODUCT' | translate}} </div>
+</div>
+
+<div class="card">
+  <div class="content">
+    <form *ngIf="item" #editForm="ngForm" (ngSubmit)="save(editForm)">
+
+
+      
+      <div class="form-group">
+        <div class="row">
+          <div class="col-md-6">
+        <label for="prop"></label>
+        <input [(ngModel)]="example.prop" id="prop" name="prop" class="form-control">
+      </div>
+          <small class="text-danger" role="alert"
+                 [hidden]="name.valid || name.pristine">
+            {{'REQUIRED_FIELD' | translate}}
+          </small>
+
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="row">
+          <div class="col-md-6">
+        <label for="id"></label>
+        <input type="number" [(ngModel)]="example.id" id="id" name="id" class="form-control">
+      </div>
+          <small class="text-danger" role="alert"
+                 [hidden]="name.valid || name.pristine">
+            {{'REQUIRED_FIELD' | translate}}
+          </small>
+
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="row">
+          <div class="col-md-6">
+        <label for="name"></label>
+        <input [(ngModel)]="example.name" id="name" name="name" class="form-control">
+      </div>
+          <small class="text-danger" role="alert"
+                 [hidden]="name.valid || name.pristine">
+            {{'REQUIRED_FIELD' | translate}}
+          </small>
+
+        </div>
+      </div>
+      
+
+      <button type="submit" class="btn btn-success" [disabled]="!editForm.form.valid">
+        {{(item.id ? 'SAVE_CHANGES' : 'SAVE') | translate }}
+      </button>
+      <button type="button" class="btn btn-light ml-1" (click)="cancel()">{{'CANCEL' | translate }}</button>
+
+    </form>
+  </div>
+</div>

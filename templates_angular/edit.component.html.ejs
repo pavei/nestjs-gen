@@ -1,0 +1,33 @@
+<div class="content-heading">
+  <div *ngIf="item">{{(item.id ? 'EDIT' : 'NEW') | translate }} {{'PRODUCT' | translate}} </div>
+</div>
+
+<div class="card">
+  <div class="content">
+    <form *ngIf="item" #editForm="ngForm" (ngSubmit)="save(editForm)">
+
+
+      <% for (let field of modelFields) { %>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-md-6">
+        <label<%if (!field.readonly) {%> for="<%=field.name%>"<%}%>><%=field.name%></label>
+        <%if (field.readonly) {%>{{item.<%=field.name%> || 'n/a'}} <%}%><%if (!field.readonly && field.type === 'date'){ %><input type="date" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } else if (!field.readonly && field.type === 'number'){ %><input type="number" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } else if (!field.readonly) { %><input [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } %>
+      </div>
+<!--          <small class="text-danger" role="alert"-->
+<!--                 [hidden]="<%=field.name%>.valid || <%=field.name%>.pristine">-->
+<!--            {{'REQUIRED_FIELD' | translate}}-->
+<!--          </small>-->
+
+        </div>
+      </div>
+      <% } %>
+
+      <button type="submit" class="btn btn-success" [disabled]="!editForm.form.valid">
+        {{(item.id ? 'SAVE_CHANGES' : 'SAVE') | translate }}
+      </button>
+      <button type="button" class="btn btn-light ml-1" (click)="cancel()">{{'CANCEL' | translate }}</button>
+
+    </form>
+  </div>
+</div>

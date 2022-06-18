@@ -1,0 +1,24 @@
+import {
+  AuthGuardService as AuthGuard
+} from '@app/auth/auth.guard.service';
+import { Routes } from '@angular/router';
+import { <%= classify(name) %>ListComponent } from './<%=dasherize(name)%>-list/<%=dasherize(name)%>-list.component';
+import { <%= classify(name) %>EditComponent } from './<%=dasherize(name)%>-edit/<%=dasherize(name)%>-edit.component';
+
+export const <%=name.toUpperCase()%>_ROUTES: Routes = [
+  {
+    path: '',
+    component: <%= classify(name) %>ListComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: ':id/edit',
+    component: <%= classify(name) %>EditComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'new',
+    component: <%= classify(name) %>EditComponent,
+    canActivate: [AuthGuard]
+  }
+];

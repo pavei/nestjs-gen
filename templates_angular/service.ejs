@@ -1,0 +1,43 @@
+import { <%= modelClass %> } from './<%=dasherize(name)%>.entity';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { RequestUtil } from '@app/shared/service/requestutil';
+import { environment } from '@env/environment';
+
+const APP_URL = `${environment.url_rest}/<%= namePluralize %>`;
+
+@Injectable()
+export class <%= modelClass %>Service {
+
+
+  constructor(
+      private http: HttpClient,
+      private requestUtil: RequestUtil) {}
+
+  async list(): Promise<<%= modelClass %>[]> {
+    const requestObj = await this.requestUtil.getDefaultRequestOptions();
+    return this.http.get(APP_URL, requestObj).toPromise() as Promise<<%= modelClass %>[]>;
+  }
+
+  async find(id): Promise<<%= modelClass %>> {
+    const requestObj = await this.requestUtil.getDefaultRequestOptions();
+    return this.http.get(APP_URL + '/' + id, requestObj).toPromise() as Promise<<%= modelClass %>>;
+  }
+
+  async save(entity: <%= modelClass %>) {
+    const requestObj = await this.requestUtil.getDefaultRequestOptions();
+    return this.http.post(APP_URL, entity, requestObj).toPromise();
+  }
+
+  async update(entity: <%= modelClass %>) {
+    const requestObj = await this.requestUtil.getDefaultRequestOptions();
+    return this.http.put(APP_URL + '/' + entity.id, entity, requestObj).toPromise();
+  }
+
+  async delete(id: number) {
+    const requestObj = await this.requestUtil.getDefaultRequestOptions();
+    return this.http.delete(APP_URL + '/' + id, requestObj).toPromise();
+  }
+
+}
+

@@ -1,0 +1,62 @@
+<div>
+  <div class="content-heading">
+    <div>{{'PRODUCTS' | translate}}
+    </div>
+  </div>
+
+  <div class="row mb-2">
+    <div class="col-xs-12 col-lg-4">
+      <input class="form-control" type="search" [placeholder]="'SEARCH_BY_NAME' | translate" [(ngModel)]="searchInput"
+             (keyup)="filter()" (blur)="filter()">
+    </div>
+
+    <div class="col-lg-8 col-xs-12 pull-right text-right">
+      <button class="btn" class="btn btn-success"
+              (click)="add()">
+        <i class="fa fa-plus mr-1"></i>
+        {{'ADD' | translate}}
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12 col-xs-12 pull-right text-right">
+      <button class="btn btn-link pull-right" (click)="export()"><i
+                class="fa fa-file-excel-o mr-1"></i>{{'Excel'| translate}}</button>
+    </div>
+  </div>
+
+  <div class="card card-default">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+        <tr>
+          <th *ngFor="let col of columns">{{ col.title | translate }}</th>
+          <th>{{'ACTIONS' | translate}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of this.<%= pluralize(name) %>">
+          <td *ngFor="let col of columns">{{ item[col.name] }}</td>
+          <td>
+          <span>
+            <i class="fa fa-edit action_button" [title]="'EDIT' | translate" id="edit"
+               (click)="edit(item)"></i>
+            <i class="fa fa-trash action_button" [title]="'DELETE' | translate" id="delete"
+               (click)="remove(item)"></i>
+          </span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-right">
+    <pagination *ngIf="config.paging" class="pagination" [(ngModel)]="page" [totalItems]="length"
+                [itemsPerPage]="itemsPerPage" [maxSize]="maxSize" [directionLinks]="false" [boundaryLinks]="false"
+                [rotate]="false" (pageChanged)="search()" (numPages)="numPages = $event">
+    </pagination>
+  </div>
+</div>
+

@@ -1,0 +1,74 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import {NgxSpinnerService} from 'ngx-spinner';
+import {ToasterService} from 'angular2-toaster';
+import { TranslatorService } from '@app/core/translator/translator.service';
+import { <%= classify(name) %>Service } from '../<%=dasherize(name)%>.service';
+import { <%= classify(name) %> } from '../<%=dasherize(name)%>.entity';
+
+@Component({
+  selector: 'app-<%=dasherize(name)%>-edit',
+  templateUrl: './<%=dasherize(name)%>-edit.component.html'
+})
+export class <%=classify(name)%>EditComponent implements OnInit {
+
+  id!: string;
+  item!: <%=classify(name)%>;
+  feedback: any = {};
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private spinner: NgxSpinnerService,
+    public translate: TranslatorService,
+    public toasterService: ToasterService,
+    private <%=camelize(name)%>Service: <%=classify(name)%>Service) {
+  }
+
+  async ngOnInit() {
+
+      const {id} = this.route.snapshot.params;
+      try {
+        await this.spinner.show();
+
+        if (id) {
+          this.item = await this.<%=camelize(name)%>Service.find(id);
+        } else {
+          this.item = new <%=classify(name)%>();
+        }
+
+      } catch (e) {
+        console.error(e);
+      } finally {
+        await this.spinner.hide();
+
+      }
+  }
+
+  async save(form) {
+    await this.spinner.show();
+
+    (this.item.id ? this.<%=camelize(name)%>Service.update(this.item) :
+            this.<%=camelize(name)%>Service.save(this.item)
+    ).then(() => {
+      this.spinner.hide();
+      this.router.navigate(['/<%=pluralize(name)%>']);
+      this.toasterService.pop(
+          'success',
+          this.translate.success(),
+          this.translate.translateText('SAVE_SUCCESS')
+      );
+    }).catch(async error => {
+      await this.spinner.hide();
+      this.toasterService.pop(
+          'error',
+          this.translate.error(),
+          error.error.message
+      );
+    })
+  }
+
+  cancel() {
+    this.router.navigate(['/<%=pluralize(name)%>']);
+  }
+}

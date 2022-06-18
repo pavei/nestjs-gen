@@ -1,0 +1,7 @@
+export class <%= modelClass %> {
+
+<% Object.keys(modelProps).forEach(function(prop) { %>
+    <%= prop %>: <%= modelProps[prop] %>;
+<% }) -%>
+
+}

@@ -1,0 +1,160 @@
+import { Component, OnInit } from '@angular/core';
+import { <%= classify(name) %>Service } from '../<%=dasherize(name)%>.service';
+import { <%= classify(name) %> } from '../<%=dasherize(name)%>.entity';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NgxSpinnerService} from 'ngx-spinner';
+import {SimpleModalService} from 'ngx-simple-modal';
+import {ToasterService} from 'angular2-toaster';
+import * as _ from 'lodash';
+import { ConfirmModalComponent } from '@app/shared/util/confirm.modal';
+import { TranslatorService } from '@app/core/translator/translator.service';
+import * as XLSX from 'xlsx';
+
+@Component({
+  selector: 'app-<%=dasherize(name)%>',
+  templateUrl: '<%=dasherize(name)%>-list.component.html'
+})
+export class <%= classify(name) %>ListComponent implements OnInit {
+
+  //for store current paginated value
+   <%= pluralize(name) %> : <%= classify(name) %>[];
+
+  //to store all data
+  data: <%= classify(name) %>[];
+
+  //to store filtred data
+  filteredItems : <%= classify(name) %>[];
+  public page = 1;
+  public itemsPerPage = 20;
+  public maxSize = 5;
+  public numPages = 1;
+  public length = 0;
+
+  searchInput = ''
+
+  public config: any = {
+      paging: true,
+      className: ['table-bordered', 'mb-0', 'd-table-fixed']
+    };
+
+  public columns: Array<any> = [
+
+    <% for (let field of modelFields) { %>
+    {title: '<%=field.name.toUpperCase()%>', name: '<%=field.name%>', sort: true},
+    <% } %>
+
+  ];
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private spinner: NgxSpinnerService,
+    public translate: TranslatorService,
+    public toasterService: ToasterService,
+    private simpleModalService: SimpleModalService,
+    private <%=camelize(name)%>Service: <%= classify(name) %>Service) { }
+
+
+  ngOnInit() {
+    this.search();
+  }
+
+   public filter() {
+    const search = this.searchInput;
+    let items = this.data;
+    if (search) {
+      items = items.filter(item => {
+        let mySearch = _.deburr(_.lowerCase(search));
+        return _.deburr(_.lowerCase(JSON.stringify(item)))
+      });
+    }
+    this.filteredItems = items;
+    this.<%= pluralize(name) %> = this.changePage({
+      page: this.page,
+      itemsPerPage: this.itemsPerPage
+    }, this.filteredItems);
+
+    this.length = this.filteredItems.length;
+  }
+
+  async search() {
+    await this.spinner.show();
+    try{
+      this.<%=pluralize(name)%> = await this.<%=camelize(name)%>Service.list();
+      this.data = this.<%=pluralize(name)%>;
+      this.filter();
+    }catch (e) {
+
+    }finally {
+      await this.spinner.hide();
+    }
+  }
+
+  public remove(item) {
+      this.simpleModalService.addModal(ConfirmModalComponent, {
+        title: this.translate.translateText('DELETE_APP'),
+        question: this.translate.translateText('ARE_YOU_SURE_DELETE'),
+        confirmButtonClass: 'btn-default',
+        cancelButtonClass: 'btn-danger',
+      }).subscribe(async (isConfirmed) => {
+        try {
+          if (isConfirmed) {
+            await this.spinner.show();
+            await this.<%=camelize(name)%>Service.delete(item.id);
+            this.toasterService.pop('success', this.translate.success(), this.translate.translateText('DELETED_SUCCESS'));
+            this.searchInput = '';
+            this.search();
+          }
+        } catch (err : any) {
+          this.toasterService.pop('error', this.translate.error(), err.error.message);
+        } finally {
+          await this.spinner.hide();
+        }
+      });
+  }
+
+  async add() {
+    await this.router.navigate(['/<%=pluralize(name)%>/new']);
+  }
+
+  async edit(item) {
+    await this.router.navigate(['/<%=pluralize(name)%>', item.id, 'edit']);
+  }
+
+  public changePage(page: any, data: Array<any>): Array<any> {
+    const start = (page.page - 1) * page.itemsPerPage;
+    const end = page.itemsPerPage > -1 ? (start + page.itemsPerPage) : data.length;
+    return data.slice(start, end);
+  }
+
+  export() {
+    this.spinner.show();
+    const limit = 60000;
+    const rows = this.mapToExport(this.data);
+    const ws = XLSX.utils.json_to_sheet(rows);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, this.translate.translateText('<%=pluralize(name)%>'));
+
+    let fileName = this.translate.translateText('<%=pluralize(name)%>');
+    fileName = fileName.toLowerCase().replace(' ', '_');
+    XLSX.writeFile(wb, `${fileName}.xlsx`);
+
+    this.spinner.hide();
+
+  }
+
+  mapToExport(list: any) {
+
+    return list.map(item => {
+      const exportObject = {};
+      const dateFormt = 'dd/MM/yyyy HH:mm';
+
+      <% for (let field of modelFields) { %>
+      exportObject[this.translate.translateText('<%=field.name.toUpperCase()%>')] = item.<%=field.name%>;
+     <% } %>
+      return exportObject;
+    });
+
+  }
+}

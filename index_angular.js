@@ -8,7 +8,6 @@ const generate = require('./lib/generator');
 const TypeHelper = require('./lib/TypeHelper');
 var pluralize = require('pluralize')
 
-
 let version = pjson ? pjson.version : '<unknown version>';
 
 prog
@@ -113,6 +112,12 @@ prog
     o.name = args.name.toLowerCase();
     o.nameUpper = _capitalize(args.name);
     o.namePluralize = pluralize(o.name)
+    o.classify = require('./strings').classify;
+
+
+    o.dasherize = require('./strings').dasherize
+    o.camelize  = require('./strings').camelize
+    o.pluralize = pluralize
 
     // set auth guarding params if applicable?
     if (o.auth) {
@@ -132,6 +137,7 @@ prog
     // Parse out model property definitions, if given
     if (modelDef) {
         o.modelProps = TypeHelper.parseModelProps(modelDef);
+        o.modelFields = TypeHelper.parseModelFields(modelDef);
     } else {
         o.modelProps = {};
     }
@@ -176,7 +182,10 @@ prog
 
         o.modelFileName = _getFileName(o.modelClass, 'entity', o.casing);
         let outFile = `${outPathModel}/${o.modelFileName}.ts`;
-        stagedFiles.push({ type: 'model', outFile });
+        stagedFiles.push({ type: 'entity', outFile });
+
+
+
     }
 
     // MODULE ?
@@ -186,33 +195,61 @@ prog
         stagedFiles.push({ type: 'module', outFile });
     }
 
-    // REPOSITORY ?
-    if (o.repository) {
-        o.repositoryName = o.nameUpper + 'Repository';
-        o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
-        let outFile = `${outPath}/${o.repositoryFileName}.ts`;
-        stagedFiles.push({ type: 'repository', outFile });
-    } else if (o.crud) {
-        // use a generic repository
-        o.repositoryName = `Repository\<${o.modelClass}\>`;
-        o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
-        let outFile = `${outPath}/${o.repositoryFileName}.ts`;
-        stagedFiles.push({ type: 'repository', outFile });
-    }
 
-    // CONTROLLER ?
-    if (o.controller || o.crud) {
-        o.controllerFileName = _getFileName(o.name, 'controller', o.casing);
-        let outFile = `${outPath}/${o.controllerFileName}.ts`;
-        stagedFiles.push({ type: 'controller', outFile });
-    }
 
-    // SERVICE ?
+    o.routesFileName = _getFileName(o.name, 'routes', o.casing);
+    let outFile = `${outPath}/${o.routesFileName}.ts`;
+    stagedFiles.push({ type: 'routes', outFile });
+
+    //
+    // // REPOSITORY ?
+    // if (o.repository) {
+    //     o.repositoryName = o.nameUpper + 'Repository';
+    //     o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
+    //     let outFile = `${outPath}/${o.repositoryFileName}.ts`;
+    //     stagedFiles.push({ type: 'repository', outFile });
+    // } else if (o.crud) {
+    //     // use a generic repository
+    //     o.repositoryName = `Repository\<${o.modelClass}\>`;
+    //     o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
+    //     let outFile = `${outPath}/${o.repositoryFileName}.ts`;
+    //     stagedFiles.push({ type: 'repository', outFile });
+    // }
+    //
+    // // CONTROLLER ?
+    // if (o.controller || o.crud) {
+    //     o.controllerFileName = _getFileName(o.name, 'controller', o.casing);
+    //     let outFile = `${outPath}/${o.controllerFileName}.ts`;
+    //     stagedFiles.push({ type: 'controller', outFile });
+    // }
+    //
+    // // SERVICE ?
     if (o.service) {
         o.serviceFileName = _getFileName(o.name, 'service', o.casing);
         let outFile = `${outPath}/${o.serviceFileName}.ts`;
         stagedFiles.push({ type: 'service', outFile });
     }
+
+    let editFolder = `${outPath}/${o.dasherize(o.name)}-edit`;
+    fs.mkdirSync(editFolder, { recursive: true });
+
+
+    ['list', 'edit'].forEach(item => {
+        let editFolder = `${outPath}/${o.dasherize(o.name)}-${item}`;
+        fs.mkdirSync(editFolder, { recursive: true });
+
+
+        ['html', 'scss', 'ts'].forEach(extension => {
+            o.editFileHtml = `./${item}/${item}.component.${extension}`
+            let editFileHtml = `${editFolder}/${o.dasherize(o.name)}-${item}.component.${extension}`;
+            stagedFiles.push({ type: `${item}.component.${extension}`, outFile: editFileHtml });
+        })
+
+
+    })
+
+
+
 
     // Actually output the staged files
     stagedFiles.forEach(fd => {
@@ -255,7 +292,7 @@ function _findConfig() {
     }
 
     // look in tsconfig.app.json?
-    config = _read(path.resolve("./tsconfig.app.json"));
+    // config = _read(path.resolve("./tsconfig.app.json"));
 
     // look in tsconfig.json?
     if (!config) {
