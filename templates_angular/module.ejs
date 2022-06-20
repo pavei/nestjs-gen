@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {SharedModule} from '@app/shared/shared.module'
 import {TranslateModule} from '@ngx-translate/core';
+import {MarkAsteriskDirectiveModule} from '@app/shared/util/mask.asterisk.directive';
 
 import { <%= classify(name) %>ListComponent } from './<%=dasherize(name)%>-list/<%=dasherize(name)%>-list.component';
 import { <%= classify(name) %>EditComponent } from './<%=dasherize(name)%>-edit/<%=dasherize(name)%>-edit.component';
@@ -16,6 +17,7 @@ import { <%= name.toUpperCase() %>_ROUTES } from './<%=dasherize(name)%>.routes'
     FormsModule,
     TranslateModule,
     SharedModule,
+    MarkAsteriskDirectiveModule,
     RouterModule.forChild(<%= name.toUpperCase() %>_ROUTES)
   ],
   declarations: [

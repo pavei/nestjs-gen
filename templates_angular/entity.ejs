@@ -1,7 +1,14 @@
-export class <%= modelClass %> {
+import {property, typed, toClass} from 'class-converter';
 
+
+export class <%= modelClass %> {
 <% Object.keys(modelProps).forEach(function(prop) { %>
+    @property()
     <%= prop %>: <%= modelProps[prop] %>;
 <% }) -%>
 
+    static fromJson(jsonData : any) : <%= modelClass %> {
+     const newInstance = toClass(jsonData,  <%= modelClass %>);
+     return newInstance;
+    }
 }

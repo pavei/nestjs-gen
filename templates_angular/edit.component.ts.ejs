@@ -33,6 +33,7 @@ export class <%=classify(name)%>EditComponent implements OnInit {
 
         if (id) {
           this.item = await this.<%=camelize(name)%>Service.find(id);
+          this.item =  <%=classify(name)%>.fromJson(this.item);
         } else {
           this.item = new <%=classify(name)%>();
         }
