@@ -113,6 +113,11 @@ prog
     o.name = args.name.toLowerCase();
     o.nameUpper = _capitalize(args.name);
     o.namePluralize = pluralize(o.name)
+    o.classify = require('./strings').classify;
+    o.dasherize = require('./strings').dasherize
+    o.camelize  = require('./strings').camelize
+    o.underscore  = require('./strings').underscore
+    o.pluralize = pluralize
 
     // set auth guarding params if applicable?
     if (o.auth) {
@@ -132,6 +137,7 @@ prog
     // Parse out model property definitions, if given
     if (modelDef) {
         o.modelProps = TypeHelper.parseModelProps(modelDef);
+        o.modelFields = TypeHelper.parseModelFields(modelDef);
     } else {
         o.modelProps = {};
     }

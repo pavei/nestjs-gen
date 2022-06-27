@@ -161,4 +161,4 @@ const STRING_UNDERSCORE_REGEXP_2 = /-|\s+/g;
     return matrix[b.length][a.length];
 }
 
-module.exports = {dasherize, classify, camelize}
+module.exports = {dasherize, classify, camelize, underscore}
