@@ -36,7 +36,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of this.<%= pluralize(name) %>">
+        <tr *ngFor="let item of this.data %>">
           <td *ngFor="let col of columns">{{ item[col.name] }}</td>
           <td>
           <span>
@@ -53,9 +53,9 @@
   </div>
 
   <div class="text-right">
-    <pagination *ngIf="config.paging" class="pagination" [(ngModel)]="page" [totalItems]="length"
-                [itemsPerPage]="itemsPerPage" [maxSize]="maxSize" [directionLinks]="false" [boundaryLinks]="false"
-                [rotate]="false" (pageChanged)="search()" (numPages)="numPages = $event">
+    <pagination *ngIf="this.paginatedData" class="pagination"  [totalItems]="this.paginatedData.meta.totalItems"
+                [itemsPerPage]="this.paginatedData.meta.itemsPerPage" [directionLinks]="false" [boundaryLinks]="false"
+                [rotate]="false" (pageChanged)="changePage($event)" (numPages)="this.paginatedData.meta.totalPages">
     </pagination>
   </div>
 </div>

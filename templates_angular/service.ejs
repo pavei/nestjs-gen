@@ -1,9 +1,10 @@
 import { <%= modelClass %> } from './<%=dasherize(name)%>.entity';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { RequestUtil } from '@app/shared/service/requestutil';
 import { environment } from '@env/environment';
-
+import {PaginateQuery} from "@app/shared/util/pagination/paginatequery";
+import {Paginated} from "@app/shared/util/pagination/paginated";
 const APP_URL = `${environment.url_rest}/<%= namePluralize %>`;
 
 @Injectable()
@@ -14,9 +15,13 @@ export class <%= modelClass %>Service {
       private http: HttpClient,
       private requestUtil: RequestUtil) {}
 
-  async list(): Promise<<%= modelClass %>[]> {
+  async list(paginateQuery : PaginateQuery):  Promise<Paginated<<%= modelClass %>>> {
     const requestObj = await this.requestUtil.getDefaultRequestOptions();
-    return this.http.get(APP_URL, requestObj).toPromise() as Promise<<%= modelClass %>[]>;
+    const httpParams = new HttpParams({
+      fromObject: JSON.parse(JSON.stringify(paginateQuery))
+    });
+    requestObj["params"] = httpParams;
+    return this.http.get(APP_URL, requestObj).toPromise() as Promise<Paginated<<%= modelClass %>>>;
   }
 
   async find(id): Promise<<%= modelClass %>> {

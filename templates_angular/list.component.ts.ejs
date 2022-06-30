@@ -8,6 +8,8 @@ import {ToasterService} from 'angular2-toaster';
 import * as _ from 'lodash';
 import { ConfirmModalComponent } from '@app/shared/util/confirm.modal';
 import { TranslatorService } from '@app/core/translator/translator.service';
+import {Paginated} from "@app/shared/util/pagination/paginated";
+import {PaginateQuery, getDefaultPaginateQuery} from "@app/shared/util/pagination/paginatequery";
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -16,26 +18,11 @@ import * as XLSX from 'xlsx';
 })
 export class <%= classify(name) %>ListComponent implements OnInit {
 
-  //for store current paginated value
-   <%= pluralize(name) %> : <%= classify(name) %>[];
-
-  //to store all data
   data: <%= classify(name) %>[];
-
-  //to store filtred data
-  filteredItems : <%= classify(name) %>[];
-  public page = 1;
-  public itemsPerPage = 20;
-  public maxSize = 5;
-  public numPages = 1;
-  public length = 0;
-
+  public itemsPerPage = 10;
   searchInput = ''
-
-  public config: any = {
-      paging: true,
-      className: ['table-bordered', 'mb-0', 'd-table-fixed']
-    };
+  paginatedData : Paginated<<%= classify(name) %>>;
+  paginateQuery : PaginateQuery;
 
   public columns: Array<any> = [
 
@@ -56,35 +43,24 @@ export class <%= classify(name) %>ListComponent implements OnInit {
 
 
   ngOnInit() {
+    this.paginateQuery = getDefaultPaginateQuery();
+    this.paginateQuery.limit = this.itemsPerPage;
     this.search();
   }
 
    public filter() {
     const search = this.searchInput;
-    let items = this.data;
-    if (search) {
-      items = items.filter(item => {
-        let mySearch = _.deburr(_.lowerCase(search));
-        return _.deburr(_.lowerCase(JSON.stringify(item)))
-      });
-    }
-    this.filteredItems = items;
-    this.<%= pluralize(name) %> = this.changePage({
-      page: this.page,
-      itemsPerPage: this.itemsPerPage
-    }, this.filteredItems);
-
-    this.length = this.filteredItems.length;
+    this.paginateQuery.search = search;
+    this.search();
   }
 
   async search() {
     await this.spinner.show();
     try{
-      this.<%=pluralize(name)%> = await this.<%=camelize(name)%>Service.list();
-      this.data = this.<%=pluralize(name)%>;
-      this.filter();
+      this.paginatedData = await this.<%=camelize(name)%>Service.list(this.paginateQuery);
+      this.data =  this.paginatedData.data;
     }catch (e) {
-
+       console.log(e);
     }finally {
       await this.spinner.hide();
     }
@@ -121,10 +97,9 @@ export class <%= classify(name) %>ListComponent implements OnInit {
     await this.router.navigate(['/<%=pluralize(name)%>', item.id, 'edit']);
   }
 
-  public changePage(page: any, data: Array<any>): Array<any> {
-    const start = (page.page - 1) * page.itemsPerPage;
-    const end = page.itemsPerPage > -1 ? (start + page.itemsPerPage) : data.length;
-    return data.slice(start, end);
+  public changePage(item: any) {
+    this.paginateQuery.page = item.page;
+    this.search();
   }
 
   export() {
