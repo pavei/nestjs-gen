@@ -1,11 +1,47 @@
-import {property, typed, toClass} from 'class-converter';
+import {property, typed, toClass, deserialize} from 'class-converter';
+
+<% modelFields.forEach(function(prop) { %>
+    <% if (prop.relation != null) { %>import { <%= classify( prop.type) %> } from '@routes/<%= prop.type.toLowerCase() %>/<%= prop.type.toLowerCase() %>.entity';<% } -%>
+<% }) -%>
 
 
 export class <%= modelClass %> {
-<% Object.keys(modelProps).forEach(function(prop) { %>
+
+<% modelFields.forEach(function(prop) { %>
+    <% if (prop.name == 'id') { %>
+        @property()
+        <%= prop.name %>: number;
+    <% } else if (prop.relation == "ONE_TO_MANY") { -%>
+        @property()
+        @typed( <%= prop.type %>)
+        <%= pluralize(camelize(prop.name)) %>: <%= prop.type %>[];
+
+    <% } else if (prop.relation == "MANY_TO_MANY") { -%>
+        @property()
+        @typed( <%= prop.type %>)
+        <%=pluralize(prop.name) %>: <%= prop.type %>[];
+
+    <% } else if (prop.relation == "MANY_TO_ONE") { -%>
+        @property()
+        @typed( <%= prop.type %>)
+        <%= camelize(prop.name) %>: <%= prop.type %>;
+
+    <% } else  { -%>
+        @property()
+        <% if (prop.type.toLowerCase() == 'date') { %>
+            @deserialize(value => new Date(value))
+        <%}%>
+        <%= camelize(prop.name) %>: <%= prop.type %>;
+    <% } -%>
+<% }) %>
+
     @property()
-    <%= prop %>: <%= modelProps[prop] %>;
-<% }) -%>
+    @deserialize(value => new Date(value))
+    createdAt: Date;
+
+    @property()
+    @deserialize(value => new Date(value))
+    updatedAt: Date;
 
     static fromJson(jsonData : any) : <%= modelClass %> {
      const newInstance = toClass(jsonData,  <%= modelClass %>);

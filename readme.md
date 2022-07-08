@@ -92,7 +92,12 @@ This will generate all the respective class files within "./modules/example/", w
 ### Specifying model properties (optional):
     ngen ammenity -a --model "id:number name:string"
 
-    ngen hotel -a --model "id:number name:string age:number ammenity:Ammenity:1n" 
+     node index.js ammenity -a --model "id:number name:string"
+    node index.js hotel -a --model "id:number name:string age:number ammenity:Ammenity:nn installation_date:Date" 
+
+
+    ngen hotel -a --model "id:number name:string age:number ammenity:Ammenity:1n installation_date:Date" 
+    ngen-angular hotel -a --model "id:number name:string age:number ammenity:Ammenity:1n installation_date:Date"
 
 
 If you specify a string of properties to the --model argumenent, the generated model file will add the given properties to the class definition, using the format propName:propType. 

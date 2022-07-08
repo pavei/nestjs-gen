@@ -8,12 +8,63 @@
 
 
       <% for (let field of modelFields) { %>
-
+        <%if (field.name.toLowerCase() != 'id' ){ %>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
               <label for="<%=field.name%>">{{'<%=field.name.toUpperCase() %>' | translate }}</label>
-       <%if (field.type === 'date'){ %><input required  #<%=field.name%>="ngModel" type="date" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } else if (field.type === 'number'){ %><input  #<%=field.name%>="ngModel" required type="number" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } else if (!field.readonly) { %><input  #<%=field.name%>="ngModel" required [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } %>
+
+                <%if (field.relation != null) {%>
+
+                <%if (field.relation == "MANY_TO_MANY") {%>
+                <ngx-select
+                        [items]="<%=pluralize(field.name)%>"
+                        [allowClear]="false"
+                        [autoClearSearch]="false"
+                        [(ngModel)]="item.<%=pluralize(field.name)%>"
+                        id="<%=field.name%>"
+                        name="<%=field.name%>"
+                        required
+                        #<%=field.name%>="ngModel"
+                        [optionTextField]="'name'"
+                        [multiple]="true"
+                >
+                </ngx-select>
+                <% } else  if  (field.relation == "MANY_TO_ONE")  {%>
+
+                <ngx-select
+                        [items]="<%=pluralize(field.name)%>"
+                        [allowClear]="false"
+                        [autoClearSearch]="false"
+                        [(ngModel)]="item.<%=(field.name)%>"
+                        id="<%=field.name%>"
+                        name="<%=field.name%>"
+                        required
+                        #<%=field.name%>="ngModel"
+                        [optionTextField]="'name'"
+
+                >
+                </ngx-select>
+
+                <% } else  if  (field.relation == "ONE_TO_MANY")  {%>
+                <ngx-select
+                        [items]="<%=pluralize(field.name)%>"
+                        [allowClear]="false"
+                        [autoClearSearch]="false"
+                        [(ngModel)]="item.<%=pluralize(field.name)%>"
+                        id="<%=field.name%>"
+                        name="<%=field.name%>"
+                        required
+                        #<%=field.name%>="ngModel"
+                        [optionTextField]="'name'"
+                        [multiple]="true"
+                >
+                </ngx-select>
+                <% } %>
+
+               <% } else {%>
+                    <%if (field.type.toLowerCase() === 'date' ){ %><input required bsDatepicker #<%=field.name%>="ngModel" type="text" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } else if (field.type === 'number'){ %><input  #<%=field.name%>="ngModel" required type="number" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } else if (!field.readonly) { %><input  #<%=field.name%>="ngModel" required [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } %>
+                <% } %>
         </div>
             <small class="text-danger" role="alert"
                    [hidden]="<%=field.name%>.valid || <%=field.name%>.pristine">
@@ -22,6 +73,7 @@
 
         </div>
       </div>
+      <% } %>
       <% } %>
 
       <button type="submit" class="btn btn-success" [disabled]="!editForm.form.valid">

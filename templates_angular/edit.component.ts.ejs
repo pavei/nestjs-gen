@@ -5,7 +5,9 @@ import {ToasterService} from 'angular2-toaster';
 import { TranslatorService } from '@app/core/translator/translator.service';
 import { <%= classify(name) %>Service } from '../<%=dasherize(name)%>.service';
 import { <%= classify(name) %> } from '../<%=dasherize(name)%>.entity';
-
+<% modelFields.forEach(function(prop) { %>
+    <% if (prop.relation != null) { %>import { <%= classify( prop.type)+'Service' %> } from '@routes/<%= prop.type.toLowerCase() %>/<%= prop.type.toLowerCase() %>.service';<% } -%>
+<% }) -%>
 @Component({
   selector: 'app-<%=dasherize(name)%>-edit',
   templateUrl: './<%=dasherize(name)%>-edit.component.html'
@@ -15,6 +17,9 @@ export class <%=classify(name)%>EditComponent implements OnInit {
   id!: string;
   item!: <%=classify(name)%>;
   feedback: any = {};
+<% modelFields.forEach(function(prop) { %>
+<% if (prop.relation != null) { %> <%=pluralize(prop.name)%> <% } -%>
+<% }) -%>
 
   constructor(
     private route: ActivatedRoute,
@@ -22,7 +27,23 @@ export class <%=classify(name)%>EditComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public translate: TranslatorService,
     public toasterService: ToasterService,
-    private <%=camelize(name)%>Service: <%=classify(name)%>Service) {
+    private <%=camelize(name)%>Service: <%=classify(name)%>Service
+<% modelFields.forEach(function(prop) { %>
+    <% if (prop.relation != null) { %>
+    <%= ', private '+prop.name+'Service'%> : <%= classify( prop.type)+'Service' %>
+    <% } -%>
+<% }) -%>
+) {
+  }
+
+
+
+  async loadDependencies(){
+    <% modelFields.forEach(function(prop) { %>
+        <% if (prop.relation != null) { %>
+         this.<%=pluralize(prop.name)%> = await this.<%= prop.name+'Service' %>.all();
+        <% } -%>
+    <% }) -%>
   }
 
   async ngOnInit() {
@@ -37,6 +58,8 @@ export class <%=classify(name)%>EditComponent implements OnInit {
         } else {
           this.item = new <%=classify(name)%>();
         }
+
+        await this.loadDependencies();
 
       } catch (e) {
         console.error(e);

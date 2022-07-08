@@ -18,8 +18,7 @@ import { <%= name.toUpperCase() %>_ROUTES } from './<%=dasherize(name)%>.routes'
     TranslateModule,
     SharedModule,
     MarkAsteriskDirectiveModule,
-    RouterModule.forChild(<%= name.toUpperCase() %>_ROUTES)
-  ],
+ ],
   declarations: [
     <%= classify(name) %>ListComponent,
     <%= classify(name) %>EditComponent

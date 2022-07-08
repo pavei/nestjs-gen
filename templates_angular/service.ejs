@@ -15,13 +15,18 @@ export class <%= modelClass %>Service {
       private http: HttpClient,
       private requestUtil: RequestUtil) {}
 
-  async list(paginateQuery : PaginateQuery):  Promise<Paginated<<%= modelClass %>>> {
+  async list(paginateQuery? : PaginateQuery):  Promise<Paginated<<%= modelClass %>>> {
     const requestObj = await this.requestUtil.getDefaultRequestOptions();
     const httpParams = new HttpParams({
       fromObject: JSON.parse(JSON.stringify(paginateQuery))
     });
     requestObj["params"] = httpParams;
     return this.http.get(APP_URL, requestObj).toPromise() as Promise<Paginated<<%= modelClass %>>>;
+  }
+
+   async all(): Promise<<%= modelClass %>[]> {
+    const requestObj = await this.requestUtil.getDefaultRequestOptions();
+    return this.http.get(APP_URL + '/all', requestObj).toPromise() as Promise<<%= modelClass %>[]>;
   }
 
   async find(id): Promise<<%= modelClass %>> {

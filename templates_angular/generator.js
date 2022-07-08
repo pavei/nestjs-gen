@@ -21,7 +21,11 @@ module.exports = (template, options, outFile) => {
 
         var fn = ejs.compile(data);
         let str = fn(options);
+        const prettier = require("prettier");
 
+        console.log("aqui no preetier", outFile)
+
+        str = prettier.format(str);
         fs.writeFileSync(outFile, str);
     });
 
