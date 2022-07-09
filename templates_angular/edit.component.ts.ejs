@@ -7,18 +7,27 @@ import { <%= classify(name) %>Service } from '../<%=dasherize(name)%>.service';
 import { <%= classify(name) %> } from '../<%=dasherize(name)%>.entity';
 <% modelFields.forEach(function(prop) { %>
     <% if (prop.relation != null) { %>import { <%= classify( prop.type)+'Service' %> } from '@routes/<%= prop.type.toLowerCase() %>/<%= prop.type.toLowerCase() %>.service';<% } -%>
+    <% if (prop.relation != null) { %>import { <%= classify( prop.type) %> } from '@routes/<%= prop.type.toLowerCase() %>/<%= prop.type.toLowerCase() %>.entity';<% } -%>
 <% }) -%>
+
+
+
 @Component({
   selector: 'app-<%=dasherize(name)%>-edit',
   templateUrl: './<%=dasherize(name)%>-edit.component.html'
 })
 export class <%=classify(name)%>EditComponent implements OnInit {
 
-  id!: string;
   item!: <%=classify(name)%>;
-  feedback: any = {};
 <% modelFields.forEach(function(prop) { %>
-<% if (prop.relation != null) { %> <%=pluralize(prop.name)%> <% } -%>
+<% if (prop.relation != null) { %> <%=pluralize(prop.name)%> : Array<<%=prop.type%>> <% } -%>
+<% }) -%>
+
+<% modelFields.forEach(function(prop) { %>
+
+    <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
+      temp<%=classify(prop.name)%>;
+    <% } -%>
 <% }) -%>
 
   constructor(
@@ -42,6 +51,13 @@ export class <%=classify(name)%>EditComponent implements OnInit {
     <% modelFields.forEach(function(prop) { %>
         <% if (prop.relation != null) { %>
          this.<%=pluralize(prop.name)%> = await this.<%= prop.name+'Service' %>.all();
+
+        <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
+         if (this.item.<%=pluralize(prop.name)%>){
+              this.<%=pluralize(prop.name)%> = this.<%=pluralize(prop.name)%>.filter(item => !this.item.<%=pluralize(prop.name)%>.find(myItem => myItem.id == item.id))
+          }
+
+        <% } -%>
         <% } -%>
     <% }) -%>
   }
@@ -69,30 +85,52 @@ export class <%=classify(name)%>EditComponent implements OnInit {
       }
   }
 
-  async save(form) {
+    async save(form) {
     await this.spinner.show();
 
-    (this.item.id ? this.<%=camelize(name)%>Service.update(this.item) :
-            this.<%=camelize(name)%>Service.save(this.item)
-    ).then(() => {
-      this.spinner.hide();
-      this.router.navigate(['/<%=pluralize(name)%>']);
+    try{
+      this.item.validate();
+
+      await (this.item.id ? this.<%=camelize(name)%>Service.update(this.item) :this.<%=camelize(name)%>Service.save(this.item))
+
       this.toasterService.pop(
-          'success',
-          this.translate.success(),
-          this.translate.translateText('SAVE_SUCCESS')
+        'success',
+        this.translate.success(),
+        this.translate.translateText('SAVE_SUCCESS')
       );
-    }).catch(async error => {
+      await this.router.navigate(['/<%=pluralize(name)%>']);
+
+    }catch(error : any) {
+      this.toasterService.pop("error", this.translate.error(), this.translate.translateText(error.message || error.error.message ));
+  }finally{
       await this.spinner.hide();
-      this.toasterService.pop(
-          'error',
-          this.translate.error(),
-          error.error.message
-      );
-    })
+    }
   }
 
   cancel() {
     this.router.navigate(['/<%=pluralize(name)%>']);
   }
+
+    <% modelFields.forEach(function(prop) { %>
+
+        <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
+            add<%= prop.type %>(e){
+              e.preventDefault();
+                let myItem = this.<%=pluralize(prop.name)%>.find(item => item.id == this.temp<%=classify(prop.name)%>);
+                if (myItem){
+                        this.item.add<%= prop.type %>(myItem );
+                        this.<%=pluralize(prop.name)%> = this.<%=pluralize(prop.name)%>.filter(item => item.id != this.temp<%=classify(prop.name)%>);
+                        this.temp<%=classify(prop.name)%> = null;
+                }
+            }
+
+            remove<%= prop.type %>(obj: <%= prop.type %>) {
+                this.item.remove<%= prop.type %>(obj);
+                this.<%=pluralize(prop.name)%>.push(obj)
+                this.temp<%=classify(prop.name)%> = null;
+            }
+
+        <%}%>
+
+    <% }) %>
 }

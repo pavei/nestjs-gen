@@ -24,9 +24,9 @@ export class <%= modelClass %>Service {
     return this.http.get(APP_URL, requestObj).toPromise() as Promise<Paginated<<%= modelClass %>>>;
   }
 
-   async all(): Promise<<%= modelClass %>[]> {
+   async all(): Promise<Array<<%= modelClass %>>> {
     const requestObj = await this.requestUtil.getDefaultRequestOptions();
-    return this.http.get(APP_URL + '/all', requestObj).toPromise() as Promise<<%= modelClass %>[]>;
+    return this.http.get(APP_URL + '/all', requestObj).toPromise() as Promise<Array<<%= modelClass %>>>;
   }
 
   async find(id): Promise<<%= modelClass %>> {

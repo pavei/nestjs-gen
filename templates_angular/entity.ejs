@@ -14,12 +14,12 @@ export class <%= modelClass %> {
     <% } else if (prop.relation == "ONE_TO_MANY") { -%>
         @property()
         @typed( <%= prop.type %>)
-        <%= pluralize(camelize(prop.name)) %>: <%= prop.type %>[];
+        <%= pluralize(camelize(prop.name)) %>: Array<<%= prop.type %>>;
 
     <% } else if (prop.relation == "MANY_TO_MANY") { -%>
         @property()
         @typed( <%= prop.type %>)
-        <%=pluralize(prop.name) %>: <%= prop.type %>[];
+        <%=pluralize(prop.name) %>: Array<<%= prop.type %>>;
 
     <% } else if (prop.relation == "MANY_TO_ONE") { -%>
         @property()
@@ -43,8 +43,49 @@ export class <%= modelClass %> {
     @deserialize(value => new Date(value))
     updatedAt: Date;
 
+
+   constructor(){
+        <% modelFields.forEach(function(prop) { %>
+         <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
+             this.<%=pluralize(prop.name) %> = new Array<<%= prop.type %>>();
+         <%}%>
+
+       <% }) %>
+    }
+
     static fromJson(jsonData : any) : <%= modelClass %> {
      const newInstance = toClass(jsonData,  <%= modelClass %>);
      return newInstance;
     }
+
+    validate(){
+
+        <% modelFields.forEach(function(prop) { %>
+            <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
+               if (!this.<%=pluralize(prop.name) %>|| this.<%=pluralize(prop.name)%>.length == 0) {
+                    throw new Error("<%=pluralize(prop.name.toUpperCase()) %>_IS_REQUIRED")
+                }
+            <%}%>
+
+        <% }) %>
+    }
+
+    <% modelFields.forEach(function(prop) { %>
+
+       <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
+       add<%= prop.type %>(item : <%= prop.type %>){
+             this.<%=pluralize(prop.name) %>.unshift(item);
+       }
+
+      remove<%= prop.type %>(item: <%= prop.type %>) {
+            let index = this.<%=pluralize(prop.name) %>.indexOf(item);
+            if (index > -1) {
+              this.<%=pluralize(prop.name) %>.splice(index, 1);
+            }
+       }
+
+      <%}%>
+
+    <% }) %>
+
 }
