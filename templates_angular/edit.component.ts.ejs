@@ -66,7 +66,9 @@ export class <%=classify(name)%>EditComponent implements OnInit {
 
       const {id} = this.route.snapshot.params;
       try {
+
         await this.spinner.show();
+
 
         if (id) {
           this.item = await this.<%=camelize(name)%>Service.find(id);
@@ -116,17 +118,14 @@ export class <%=classify(name)%>EditComponent implements OnInit {
         <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
             add<%= prop.type %>(e){
               e.preventDefault();
-                let myItem = this.<%=pluralize(prop.name)%>.find(item => item.id == this.temp<%=classify(prop.name)%>);
-                if (myItem){
-                        this.item.add<%= prop.type %>(myItem );
-                        this.<%=pluralize(prop.name)%> = this.<%=pluralize(prop.name)%>.filter(item => item.id != this.temp<%=classify(prop.name)%>);
+                        this.item.add<%= prop.type %>(this.temp<%=classify(prop.name)%>);
+                        this.<%=pluralize(prop.name)%> = this.<%=pluralize(prop.name)%>.filter(item => item.id != this.temp<%=classify(prop.name)%>.id);
                         this.temp<%=classify(prop.name)%> = null;
-                }
             }
 
             remove<%= prop.type %>(obj: <%= prop.type %>) {
                 this.item.remove<%= prop.type %>(obj);
-                this.<%=pluralize(prop.name)%>.push(obj)
+                this.<%=pluralize(prop.name)%> = [...this.<%=pluralize(prop.name)%>, obj]
                 this.temp<%=classify(prop.name)%> = null;
             }
 

@@ -38,7 +38,7 @@
         <tbody>
         <tr *ngFor="let item of this.data %>">
           <td *ngFor="let col of columns">{{ item[col.name] }}</td>
-          <td>
+          <td width="10%">
           <span>
             <i class="fa fa-edit action_button" [title]="'EDIT' | translate" id="edit"
                (click)="edit(item)"></i>
