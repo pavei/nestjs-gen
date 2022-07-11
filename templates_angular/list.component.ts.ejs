@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { <%= classify(name) %>Service } from '../<%=dasherize(name)%>.service';
-import { <%= classify(name) %> } from '../<%=dasherize(name)%>.entity';
+import { <%= modelClass %>Service } from '../<%=dasherize(name)%>.service';
+import { <%= modelClass %> } from '../<%=dasherize(name)%>.entity';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgxSpinnerService} from 'ngx-spinner';
 import {SimpleModalService} from 'ngx-simple-modal';
@@ -16,18 +16,18 @@ import * as XLSX from 'xlsx';
   selector: 'app-<%=dasherize(name)%>',
   templateUrl: '<%=dasherize(name)%>-list.component.html'
 })
-export class <%= classify(name) %>ListComponent implements OnInit {
+export class <%= modelClass %>ListComponent implements OnInit {
 
-  data: <%= classify(name) %>[];
+  data: <%= modelClass %>[];
   public itemsPerPage = 10;
   searchInput = ''
-  paginatedData : Paginated<<%= classify(name) %>>;
+  paginatedData : Paginated<<%= modelClass %>>;
   paginateQuery : PaginateQuery;
 
   public columns: Array<any> = [
 
     <% for (let field of modelFields) { %>
-    {title: '<%=field.name.toUpperCase()%>', name: '<%=field.name%>', sort: true},
+    {title: '<%=field.name.toUpperCase()%>', name: '<%=camelize(field.name)%>', sort: true},
     <% } %>
 
   ];
@@ -39,7 +39,7 @@ export class <%= classify(name) %>ListComponent implements OnInit {
     public translate: TranslatorService,
     public toasterService: ToasterService,
     private simpleModalService: SimpleModalService,
-    private <%=camelize(name)%>Service: <%= classify(name) %>Service) { }
+    private <%=camelize(name)%>Service: <%= modelClass %>Service) { }
 
 
   ngOnInit() {
@@ -126,7 +126,7 @@ export class <%= classify(name) %>ListComponent implements OnInit {
       const dateFormt = 'dd/MM/yyyy HH:mm';
 
       <% for (let field of modelFields) { %>
-      exportObject[this.translate.translateText('<%=field.name.toUpperCase()%>')] = item.<%=field.name%>;
+      exportObject[this.translate.translateText('<%=field.name.toUpperCase()%>')] = item.<%=camelize(field.name)%>;
      <% } %>
       return exportObject;
     });

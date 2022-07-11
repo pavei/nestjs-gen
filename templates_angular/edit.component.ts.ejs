@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {NgxSpinnerService} from 'ngx-spinner';
 import {ToasterService} from 'angular2-toaster';
 import { TranslatorService } from '@app/core/translator/translator.service';
-import { <%= classify(name) %>Service } from '../<%=dasherize(name)%>.service';
-import { <%= classify(name) %> } from '../<%=dasherize(name)%>.entity';
+import { <%= modelClass %>Service } from '../<%=dasherize(name)%>.service';
+import { <%= modelClass %> } from '../<%=dasherize(name)%>.entity';
 <% modelFields.forEach(function(prop) { %>
     <% if (prop.relation != null) { %>import { <%= classify( prop.type)+'Service' %> } from '@routes/<%= prop.type.toLowerCase() %>/<%= prop.type.toLowerCase() %>.service';<% } -%>
     <% if (prop.relation != null) { %>import { <%= classify( prop.type) %> } from '@routes/<%= prop.type.toLowerCase() %>/<%= prop.type.toLowerCase() %>.entity';<% } -%>
@@ -16,11 +16,11 @@ import { <%= classify(name) %> } from '../<%=dasherize(name)%>.entity';
   selector: 'app-<%=dasherize(name)%>-edit',
   templateUrl: './<%=dasherize(name)%>-edit.component.html'
 })
-export class <%=classify(name)%>EditComponent implements OnInit {
+export class <%=modelClass%>EditComponent implements OnInit {
 
-  item!: <%=classify(name)%>;
+  item!: <%=modelClass%>;
 <% modelFields.forEach(function(prop) { %>
-<% if (prop.relation != null) { %> <%=pluralize(prop.name)%> : Array<<%=prop.type%>> <% } -%>
+<% if (prop.relation != null) { %> <%=pluralize(camelize(prop.name))%> : Array<<%=prop.type%>> <% } -%>
 <% }) -%>
 
 <% modelFields.forEach(function(prop) { %>
@@ -36,10 +36,10 @@ export class <%=classify(name)%>EditComponent implements OnInit {
     private spinner: NgxSpinnerService,
     public translate: TranslatorService,
     public toasterService: ToasterService,
-    private <%=camelize(name)%>Service: <%=classify(name)%>Service
+    private <%=camelize(name)%>Service: <%=modelClass%>Service
 <% modelFields.forEach(function(prop) { %>
     <% if (prop.relation != null) { %>
-    <%= ', private '+prop.name+'Service'%> : <%= classify( prop.type)+'Service' %>
+    <%= ', private '+camelize(prop.name)+'Service'%> : <%= classify( prop.type)+'Service' %>
     <% } -%>
 <% }) -%>
 ) {
@@ -50,11 +50,11 @@ export class <%=classify(name)%>EditComponent implements OnInit {
   async loadDependencies(){
     <% modelFields.forEach(function(prop) { %>
         <% if (prop.relation != null) { %>
-         this.<%=pluralize(prop.name)%> = await this.<%= prop.name+'Service' %>.all();
+         this.<%=pluralize(camelize(prop.name))%> = await this.<%= camelize(prop.name)+'Service' %>.all();
 
         <% if (prop.relation == "MANY_TO_MANY" || prop.relation == "ONE_TO_MANY") { %>
-         if (this.item.<%=pluralize(prop.name)%>){
-              this.<%=pluralize(prop.name)%> = this.<%=pluralize(prop.name)%>.filter(item => !this.item.<%=pluralize(prop.name)%>.find(myItem => myItem.id == item.id))
+         if (this.item.<%=pluralize(camelize(prop.name))%>){
+              this.<%=pluralize(camelize(prop.name))%> = this.<%=pluralize(camelize(prop.name))%>.filter(item => !this.item.<%=pluralize(camelize(prop.name))%>.find(myItem => myItem.id == item.id))
           }
 
         <% } -%>
@@ -72,9 +72,9 @@ export class <%=classify(name)%>EditComponent implements OnInit {
 
         if (id) {
           this.item = await this.<%=camelize(name)%>Service.find(id);
-          this.item =  <%=classify(name)%>.fromJson(this.item);
+          this.item =  <%=modelClass%>.fromJson(this.item);
         } else {
-          this.item = new <%=classify(name)%>();
+          this.item = new <%=modelClass%>();
         }
 
         await this.loadDependencies();
@@ -119,13 +119,13 @@ export class <%=classify(name)%>EditComponent implements OnInit {
             add<%= prop.type %>(e){
               e.preventDefault();
                         this.item.add<%= prop.type %>(this.temp<%=classify(prop.name)%>);
-                        this.<%=pluralize(prop.name)%> = this.<%=pluralize(prop.name)%>.filter(item => item.id != this.temp<%=classify(prop.name)%>.id);
+                        this.<%=pluralize(camelize(prop.name))%> = this.<%=pluralize(camelize(prop.name))%>.filter(item => item.id != this.temp<%=classify(prop.name)%>.id);
                         this.temp<%=classify(prop.name)%> = null;
             }
 
             remove<%= prop.type %>(obj: <%= prop.type %>) {
                 this.item.remove<%= prop.type %>(obj);
-                this.<%=pluralize(prop.name)%> = [...this.<%=pluralize(prop.name)%>, obj]
+                this.<%=pluralize(camelize(prop.name))%> = [...this.<%=pluralize(camelize(prop.name))%>, obj]
                 this.temp<%=classify(prop.name)%> = null;
             }
 

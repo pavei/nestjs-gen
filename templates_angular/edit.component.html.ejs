@@ -12,26 +12,26 @@
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
-              <label for="<%=field.name%>">{{'<%=field.name.toUpperCase() %>' | translate }}</label>
+              <label for="<%=camelize(field.name)%>">{{'<%=field.name.toUpperCase() %>' | translate }}</label>
 
                 <%if (field.relation  != null && field.relation == "MANY_TO_ONE"){ %>
                     <ng-select
-                            [items]="<%=pluralize(field.name)%>"
-                            [(ngModel)]="item.<%=(field.name)%>"
-                            id="<%=field.name%>"
-                            name="<%=field.name%>"
+                            [items]="<%=pluralize(camelize(field.name))%>"
+                            [(ngModel)]="item.<%=camelize(field.name)%>"
+                            id="<%=camelize(field.name)%>"
+                            name="<%=camelize(field.name)%>"
                             required
-                            #<%=field.name%>="ngModel"
+                            #<%=camelize(field.name)%>="ngModel"
                             [bindLabel]="'name'"
                     >
                     </ng-select>
                     <%} else if (field.type.toLowerCase() === 'date' ){ %>
-                    <input required bsDatepicker #<%=field.name%>="ngModel" type="text" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control">
-                <% } else if (field.type === 'number'){ %><input  #<%=field.name%>="ngModel" required type="number" [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } else if (!field.readonly) { %><input  #<%=field.name%>="ngModel" required [(ngModel)]="item.<%=field.name%>" id="<%=field.name%>" name="<%=field.name%>" class="form-control"><% } %>
+                    <input required bsDatepicker #<%=camelize(field.name)%>="ngModel" type="text" [(ngModel)]="item.<%=camelize(field.name)%>" id="<%=camelize(field.name)%>" name="<%=camelize(field.name)%>" class="form-control">
+                <% } else if (field.type === 'number'){ %><input  #<%=camelize(field.name)%>="ngModel" required type="number" [(ngModel)]="item.<%=camelize(field.name)%>" id="<%=camelize(field.name)%>" name="<%=camelize(field.name)%>" class="form-control"><% } else if (!field.readonly) { %><input  #<%=camelize(field.name)%>="ngModel" required [(ngModel)]="item.<%=camelize(field.name)%>" id="<%=camelize(field.name)%>" name="<%=camelize(field.name)%>" class="form-control"><% } %>
 
         </div>
             <small class="text-danger" role="alert"
-                   [hidden]="<%=field.name%>.valid || <%=field.name%>.pristine">
+                   [hidden]="<%=camelize(field.name)%>.valid || <%=camelize(field.name)%>.pristine">
               {{'REQUIRED_FIELD' | translate}}
             </small>
 
@@ -64,11 +64,11 @@
                                     </label>
 
                                     <ng-select
-                                            [items]="<%=pluralize(field.name)%>"
+                                            [items]="<%=pluralize(camelize(field.name))%>"
                                             [(ngModel)]="temp<%=classify(field.name)%>"
-                                            id="<%=field.name%>"
-                                            name="<%=field.name%>"
-                                            #<%=field.name%>="ngModel"
+                                            id="<%=camelize(field.name)%>"
+                                            name="<%=camelize(field.name)%>"
+                                            #<%=camelize(field.name)%>="ngModel"
                                             [bindLabel]="'name'"
 
                                     >

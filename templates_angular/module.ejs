@@ -6,9 +6,9 @@ import {SharedModule} from '@app/shared/shared.module'
 import {TranslateModule} from '@ngx-translate/core';
 import {MarkAsteriskDirectiveModule} from '@app/shared/util/mask.asterisk.directive';
 
-import { <%= classify(name) %>ListComponent } from './<%=dasherize(name)%>-list/<%=dasherize(name)%>-list.component';
-import { <%= classify(name) %>EditComponent } from './<%=dasherize(name)%>-edit/<%=dasherize(name)%>-edit.component';
-import { <%= classify(name) %>Service } from './<%=dasherize(name)%>.service';
+import { <%= modelClass %>ListComponent } from './<%=dasherize(name)%>-list/<%=dasherize(name)%>-list.component';
+import { <%= modelClass %>EditComponent } from './<%=dasherize(name)%>-edit/<%=dasherize(name)%>-edit.component';
+import { <%= modelClass %>Service } from './<%=dasherize(name)%>.service';
 import { <%= name.toUpperCase() %>_ROUTES } from './<%=dasherize(name)%>.routes';
 
 @NgModule({
@@ -20,10 +20,10 @@ import { <%= name.toUpperCase() %>_ROUTES } from './<%=dasherize(name)%>.routes'
     MarkAsteriskDirectiveModule,
  ],
   declarations: [
-    <%= classify(name) %>ListComponent,
-    <%= classify(name) %>EditComponent
+    <%= modelClass %>ListComponent,
+    <%= modelClass %>EditComponent
   ],
-  providers: [<%= classify(name) %>Service],
+  providers: [<%= modelClass %>Service],
   exports: []
 })
-export class <%= classify(name) %>Module { }
+export class <%= modelClass %>Module { }
