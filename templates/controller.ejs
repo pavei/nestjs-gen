@@ -1,11 +1,12 @@
-import { Controller, Request, Param, Body, Get, Post, Put, Delete, ParseIntPipe, ParseUUIDPipe<% if (auth) { %>, UseGuards<% } %> } from "@nestjs/common";
+import { Controller, Request, Param, Body, Get, Post, Put, Delete, ParseIntPipe, ParseUUIDPipe, UseGuards } from "@nestjs/common";
 <% if (service) { %>import { <%= nameUpper %>Service } from './<%= serviceFileName %>';
 <% } else { -%>
 <% if (repository) { %>import { <%= nameUpper %>Repository } from './<%= repositoryFileName %>';
 <% } else if (crud) { %>import { Repository } from 'typeorm'; <% } -%>
 <% } -%>
 <% if (model || repository || crud) { %>import { <%= modelClass %> } from './<%= modelDir %><%= modelFileName %>';<% } %>
-<% if (auth) { %>import { <%= authGuardClass %> } from '<%= authGuardDir %>';<% } %>
+import { <%= authGuardClass %> } from '<%= authGuardDir %>'
+import {Paginate, Paginated, PaginateQuery} from "nestjs-paginate";
 import { GetUser } from '../auth/get-user.decorator';
 
 
@@ -18,6 +19,13 @@ export class <%= nameUpper %>Controller {
     }
 
 <% if (crud) { -%>
+
+    @Get('/all')
+    public async all(@GetUser() user): Promise<<%= modelClass %>[]> {
+    <% if (service) { %>return await this.<%= name %>Service.findAll();
+    <% } else if (repository || crud) { %>return await this.<%= name %>Repository.find({<% if (auth) { %>where: { user: req.principal }<% } %>});<% } %>
+    }
+
     @Get('/:id')
     public async getById(@Param('id', ParseIntPipe) id,  @GetUser() user): Promise<<%= modelClass %>> {
         <% if (service) { -%>return await this.<%= name %>Service.findById(id);
@@ -60,10 +68,15 @@ export class <%= nameUpper %>Controller {
         return <%= name%>;<% } %>
     }
 
+
     @Get()
-    public async list(@GetUser() user): Promise<Array<<%= modelClass %>>> {
-        <% if (service) { %>return await this.<%= name %>Service.findAll();
+    public async list(@GetUser() user, @Paginate() query: PaginateQuery): Promise<Paginated<<%= modelClass %>>> {
+        <% if (service) { %>return await this.<%= name %>Service.list(query);
         <% } else if (repository || crud) { %>return await this.<%= name %>Repository.find({<% if (auth) { %>where: { user: req.principal }<% } %>});<% } %>
-    }<% } %>
+    }
+
+
+            <% } %>
+
 
 }

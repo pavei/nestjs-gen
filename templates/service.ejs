@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException} from '@nestjs/common';
+import {paginate, Paginated, PaginateQuery} from "nestjs-paginate";
 <% if (repository) { %>import { <%= nameUpper %>Repository } from './<%= repositoryFileName %>';<% } %>
 <% if (model || repository || crud) { %>import { <%= modelClass %> } from './<%= modelDir %><%= modelFileName %>';<% } %>
 
@@ -52,10 +53,28 @@ export class <%= nameUpper %>Service {
         }
     }
 
-    async findAll(): Promise< <%= modelClass %>[]> {
-        this.logger.debug(`findAll()`);
-         return await this.<%= name %>Repository.find();
+    async list(query : PaginateQuery): Promise<Paginated<<%= modelClass %>>> {
+        this.logger.debug(`list()`, query);
+        try{
+            let data  = paginate(query, this.<%= name %>Repository, {
+                sortableColumns: ['id'],
+                defaultSortBy: [['id', 'DESC']]
+            })
+        return data;
+        }catch (e) {
+            this.logger.debug(e);
+        }
     }
+    async findAll(): Promise<<%= modelClass %>[]> {
+        this.logger.debug(`all()`);
+        try{
+            let data  = await this.<%= name %>Repository.find();
+        return data;
+        }catch (e) {
+            this.logger.debug(e);
+        }
+    }
+
 
 <% } %>
 }

@@ -1,24 +1,42 @@
 <% if (modelBaseClass) { %>import { <%= modelBaseClass %> } from '<%= modelBaseDir %><%= modelBaseClass %>';<% } -%>
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn,  ManyToOne, OneToMany, ManyToMany, JoinTable} from 'typeorm';
+<% modelFields.forEach(function(prop) { %>
+    <% if (prop.relation != null) { %>import { <%= classify( prop.type) %> } from '../<%= prop.type.toLowerCase() %>/<%= prop.type.toLowerCase() %>.entity';<% } -%>
+<% }) -%>
 
-@Entity('<%= modelClassLower %>')
+
+@Entity('<%= underscore(modelClass) %>')
 export class <%= modelClass %> <% if (modelBaseClass) { %>extends <%= modelBaseClass %> <% } %>{
 <% if (modelBaseClass) { %>
     constructor() {
         super();
     }
 <% } -%>
-<% if (!Object.values(modelProps).includes('primary')) { %>
+
+<% modelFields.forEach(function(prop) { %>
+<% if (prop.name == 'id') { %>
     @PrimaryGeneratedColumn()
-    id: number;
-<% } -%>
-<% Object.keys(modelProps).forEach(function(prop) { %>
-<% if (modelProps[prop] == 'primary') { %>
-    @PrimaryGeneratedColumn()
-    <%= prop %>: number;
-<% } else { -%>
+    <%= prop.name %>: number;
+<% } else if (prop.relation == "ONE_TO_MANY") { -%>
+    @OneToMany(type => <%= prop.type %>, object => object.<%= modelClassLower %>,  { eager: true, cascade: true})
+    <%= pluralize(camelize(prop.name)) %>: <%= prop.type %>[];
+
+<% } else if (prop.relation == "MANY_TO_MANY") { -%>
+    @ManyToMany(type =>  <%= prop.type %>,  {
+        eager: true
+    })
+    @JoinTable()
+    <%= pluralize(prop.name) %>: <%= prop.type %>[];
+
+<% } else if (prop.relation == "MANY_TO_ONE") { -%>
+    @ManyToOne(type =>  <%= prop.type %>,  {
+         eager: true
+    })
+    <%= camelize(prop.name) %>: <%= prop.type %>;
+
+<% } else  { -%>
     @Column()
-    <%= prop %>: <%= modelProps[prop] %>;
+    <%= camelize(prop.name) %>: <%= prop.type %>;
 <% } -%>
 <% }) %>
     @CreateDateColumn()
