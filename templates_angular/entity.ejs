@@ -54,7 +54,7 @@ export class <%= modelClass %> {
     }
 
     static fromJson(jsonData : any) : <%= modelClass %> {
-     const newInstance = toClass(jsonData,  <%= modelClass %>);
+     const newInstance = toClass(jsonData,  <%= modelClass %>, {distinguishNullAndUndefined: true});
      return newInstance;
     }
 

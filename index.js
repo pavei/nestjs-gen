@@ -7,7 +7,7 @@ const path = require('path');
 const generate = require('./lib/generator');
 const TypeHelper = require('./lib/TypeHelper');
 var pluralize = require('pluralize')
-
+var kebab = require('./strings').kebab
 
 let version = pjson ? pjson.version : '<unknown version>';
 
@@ -106,8 +106,9 @@ prog
     if (o.c || o.controller) { o.controller = true };
     if (o.s || o.service) { o.service = true };
 
+    console.log("aqui no all")
     if (o.all) {
-        o.module = o.repository = o.model = o.controller = o.service = o.crud = true;
+        o.module = o.controller = o.service = o.crud = true;
     }
 
     o.name = args.name.toLowerCase();
@@ -117,7 +118,18 @@ prog
     o.dasherize = require('./strings').dasherize
     o.camelize  = require('./strings').camelize
     o.underscore  = require('./strings').underscore
+    o.kebab  = require('./strings').kebab
     o.pluralize = pluralize
+
+    if (!o.modelClass) {
+        o.modelClass = o.nameUpper;
+        if (o.modelClass.charAt(o.modelClass.length-1) === 's') {
+            o.modelClass = o.modelClass.substr(0, o.modelClass.length-1);
+        }
+    }
+
+    o.modelClassLower = o.modelClass.toLowerCase();
+
 
     // set auth guarding params if applicable?
     if (o.auth) {
@@ -148,9 +160,9 @@ prog
     // make containing folder for the module, if using, or otherwise the package name
     let outPath =  path.resolve((o.prefix ? o.prefix : './'));
     if (o.module) {
-        outPath += `/${o.name}`;
+        outPath += `/${kebab(o.modelClass)}`;
     } else {
-        outPath += o.noSubdir ? '' : `/${o.name}`;
+        outPath += o.noSubdir ? '' : `/${kebab(o.modelClass)}`;
     }
 
     fs.mkdirSync(outPath, { recursive: true });
@@ -158,17 +170,11 @@ prog
     // Stage generation of each type of file...
 
     let stagedFiles = [];
-    
-    // MODEL ?
-    if (o.model || o.repository || o.crud) {
-        if (!o.modelClass) {
-            o.modelClass = o.nameUpper;
-            if (o.modelClass.charAt(o.modelClass.length-1) === 's') {
-                o.modelClass = o.modelClass.substr(0, o.modelClass.length-1);
-            }
-        }
 
-        o.modelClassLower = o.modelClass.toLowerCase();
+
+
+    // MODEL ?
+    if (o.model || o.repository) {
 
         let outPathModel = outPath;
         if (o.modelDir) {
@@ -187,35 +193,35 @@ prog
 
     // MODULE ?
     if (o.module) {
-        o.moduleFileName = _getFileName(o.name, 'module', o.casing);
+        o.moduleFileName = _getFileName(o.modelClass, 'module', o.casing);
         let outFile = `${outPath}/${o.moduleFileName}.ts`;
         stagedFiles.push({ type: 'module', outFile });
     }
 
-    // REPOSITORY ?
-    if (o.repository) {
-        o.repositoryName = o.nameUpper + 'Repository';
-        o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
-        let outFile = `${outPath}/${o.repositoryFileName}.ts`;
-        stagedFiles.push({ type: 'repository', outFile });
-    } else if (o.crud) {
-        // use a generic repository
-        o.repositoryName = `Repository\<${o.modelClass}\>`;
-        o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
-        let outFile = `${outPath}/${o.repositoryFileName}.ts`;
-        stagedFiles.push({ type: 'repository', outFile });
-    }
+    // // REPOSITORY ?
+    // if (o.repository) {
+    //     o.repositoryName = o.nameUpper + 'Repository';
+    //     o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
+    //     let outFile = `${outPath}/${o.repositoryFileName}.ts`;
+    //     stagedFiles.push({ type: 'repository', outFile });
+    // } else if (o.crud) {
+    //     // use a generic repository
+    //     o.repositoryName = `Repository\<${o.modelClass}\>`;
+    //     o.repositoryFileName = _getFileName(o.name, 'repository', o.casing);
+    //     let outFile = `${outPath}/${o.repositoryFileName}.ts`;
+    //     stagedFiles.push({ type: 'repository', outFile });
+    // }
 
     // CONTROLLER ?
     if (o.controller || o.crud) {
-        o.controllerFileName = _getFileName(o.name, 'controller', o.casing);
+        o.controllerFileName = _getFileName(o.modelClass, 'controller', o.casing);
         let outFile = `${outPath}/${o.controllerFileName}.ts`;
         stagedFiles.push({ type: 'controller', outFile });
     }
 
     // SERVICE ?
     if (o.service) {
-        o.serviceFileName = _getFileName(o.name, 'service', o.casing);
+        o.serviceFileName = _getFileName(o.modelClass, 'service', o.casing);
         let outFile = `${outPath}/${o.serviceFileName}.ts`;
         stagedFiles.push({ type: 'service', outFile });
     }
@@ -238,6 +244,13 @@ function _capitalize(str) {
 
 function _getFileName(className, type, casing) {
     let _default = `${className.toLowerCase()}.${type}`;
+
+    if (casing === 'kebab'){
+        console.log(className)
+        console.log(`${kebab(className)}.${type}`)
+       return `${kebab(className)}.${type}`
+    }
+
     return casing ? (casing === 'pascal' ? `${_capitalize(className)}${_capitalize(type)}` : _default) : _default;
 }
 

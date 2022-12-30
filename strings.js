@@ -161,4 +161,10 @@ const STRING_UNDERSCORE_REGEXP_2 = /-|\s+/g;
     return matrix[b.length][a.length];
 }
 
-module.exports = {dasherize, classify, camelize, underscore}
+function kebab(string){
+    return string.replace(/([a-z])([A-Z])/g, "$1-$2")
+        .replace(/\s+/g, '-')
+        .toLowerCase();
+}
+
+module.exports = {dasherize, classify, camelize, underscore, kebab}
